@@ -5,13 +5,14 @@ import { Repository } from 'typeorm';
 import { CreateUserDTO } from './dtos/createUser.dto';
 import { UpdateUserDTO } from './dtos/updateUser.dto';
 import * as bcrypt from 'bcrypt'; // Importa bcrypt
-import { AuthorizedUser } from './dtos/updateAuthorizedUser.dto';
 import { UpdateByParamDTO } from './dtos/updateByParam.dto';
+import { EventsGateway } from 'src/gateway/gateway';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(Users) private userRepository: Repository<Users>,
+    private gatewaySvc: EventsGateway,
   ) {}
 
   async createUser(_user: CreateUserDTO) {
@@ -30,6 +31,12 @@ export class UsersService {
     const newUser = this.userRepository.create({
       ..._user,
       password: hashedPassword,
+    });
+
+    this.gatewaySvc.emitEvent('socket_create_user', {
+      ok: true,
+      data: newUser,
+      msg: 'Socket Success!',
     });
 
     return this.userRepository.save(newUser);
@@ -62,6 +69,11 @@ export class UsersService {
       return new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
+    this.gatewaySvc.emitEvent('socket_user_delete', {
+      ok: true,
+      msg: 'Socket Success!',
+    });
+
     return new HttpException('User successfully deleted', HttpStatus.OK);
   }
 
@@ -77,6 +89,12 @@ export class UsersService {
     }
 
     const updateUser = Object.assign(userFound, _user);
+
+    this.gatewaySvc.emitEvent('socket_update_user', {
+      ok: true,
+      data: updateUser,
+      msg: 'Socket Success!',
+    });
     return this.userRepository.save(updateUser);
   }
 
@@ -92,6 +110,13 @@ export class UsersService {
     }
     if (userFound.hasOwnProperty(value.param)) {
       userFound[value.param] = value.value;
+
+      this.gatewaySvc.emitEvent('socket_user_update_by_param', {
+        ok: true,
+        data: userFound,
+        msg: 'Socket Success!',
+      });
+
       return this.userRepository.save(userFound);
     } else {
       throw new HttpException('Invalid parameter', HttpStatus.BAD_REQUEST);

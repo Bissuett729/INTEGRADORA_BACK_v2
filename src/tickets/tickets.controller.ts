@@ -15,17 +15,23 @@ import { CreateTicketDTO } from './dto/createTicket.dto';
 import { UpdateTicketDTO } from './dto/updateTicket.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { EventsGateway } from 'src/gateway/gateway';
 
 @ApiBearerAuth()
 @ApiTags('Tickets')
 @Controller('tickets')
 export class TicketsController {
-  constructor(private ticketsSvc: TicketsService) {}
+  constructor(private ticketsSvc: TicketsService, private eventsGateway: EventsGateway) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Get('v1/get-all-tickets')
+  getAllTickets(): Promise<Tickets[]> {
+    return this.ticketsSvc.getAllTickets();
+  }
 
   @UseGuards(JwtAuthGuard)
   @Get('v1/get-all-tickets/:id_user')
   getTickets(@Param('id_user') id_user?: string): Promise<Tickets[]> {
-    // Ahora puedes utilizar los parámetros en tu lógica para obtener los tickets
     return this.ticketsSvc.getTickets(id_user);
   }
 

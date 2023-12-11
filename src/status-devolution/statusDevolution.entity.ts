@@ -15,7 +15,7 @@ export class StatusDevolution {
   userOwner: Users;
 
   @Column()
-  status: string;
+  qty: number;
 
   @Column()
   id_ticket: number;

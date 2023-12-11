@@ -39,7 +39,7 @@ config(); // Carga las variables de entorno desde el archivo .env
     StatusFinishedModule,
     StatusValidationModule,
     AuthModule,
-    GatewayModule
+    GatewayModule,
   ],
 })
 export class AppModule {}

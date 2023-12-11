@@ -1,27 +1,43 @@
 import {
-  MessageBody,
+  WebSocketGateway,
+  OnGatewayInit,
+  WebSocketServer,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  OnGatewayInit,
-  SubscribeMessage,
-  WebSocketGateway,
-  WebSocketServer,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { Logger } from '@nestjs/common';
+import { Socket, Server } from 'socket.io';
 
-@WebSocketGateway(2450, { cors: { origin: '*' } })
-export class MyGateway
+@WebSocketGateway({
+  cors: {
+    origin: '*',
+    // methods: ['GET', 'POST'],
+    credentials: true,
+  },
+}) // Puedes especificar un puerto, ej.: @WebSocketGateway(8080)
+export class EventsGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  handleConnection(client: any, ...args: any[]) {
-    console.log('Hola alguien se conecto al socket !! :)');
-  }
-  handleDisconnect(client: any) {
-    throw new Error('Se desconectaron del socket');
-  }
-  afterInit(server: any) {
-    console.log('Esto se ejecuta cuando inicia');
+  @WebSocketServer() server: Server;
+  private logger: Logger = new Logger('EventsGateway');
+
+  afterInit(server: Server) {
+    this.logger.log('Initialized!' + server);
   }
 
-  @WebSocketServer() server: Server;
+  handleConnection(client: Socket, ...args: any[]) {
+    console.log(args);
+    
+    this.logger.log(`Client connected: ${client.id}`);
+  }
+
+  handleDisconnect(client: Socket) {
+    this.logger.log(`Client disconnected: ${client.id}`);
+  }
+
+  // Función para emitir eventos
+  emitEvent(eventName: string, data: any): void {
+    this.logger.log(eventName);
+    this.server.emit(eventName, data);
+  }
 }

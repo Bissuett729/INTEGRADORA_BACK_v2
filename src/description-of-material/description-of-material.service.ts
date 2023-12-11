@@ -4,7 +4,7 @@ import { DescriptionOfMaterial } from './descriptionOfMaterial.entity';
 import { Repository } from 'typeorm';
 import { CreateDescriptionDTO } from './dto/createDescription.dto';
 import { TypesOfMaterialService } from 'src/types-of-material/types-of-material.service';
-import { log } from 'console';
+import { EventsGateway } from 'src/gateway/gateway';
 
 @Injectable()
 export class DescriptionOfMaterialService {
@@ -12,6 +12,7 @@ export class DescriptionOfMaterialService {
     @InjectRepository(DescriptionOfMaterial)
     private typeOfMaterialRepository: Repository<DescriptionOfMaterial>,
     private TypeSvc: TypesOfMaterialService,
+    private gatewaySvc: EventsGateway,
   ) {}
 
   async createNewDescription(_description: CreateDescriptionDTO) {
@@ -37,6 +38,11 @@ export class DescriptionOfMaterialService {
     } else {
       // Si el tipo existe y la descripción no existe, crea y guarda la nueva descripción
       const newDescription = this.typeOfMaterialRepository.create(_description);
+
+      this.gatewaySvc.emitEvent('socket_create_description', {
+        ok: true,
+        msg: 'Socket Success!',
+      });
       return this.typeOfMaterialRepository.save(newDescription);
     }
   }

@@ -19,10 +19,10 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   // Aquí especifica la dirección IP y el puerto
-  // const ip = '192.168.88.7';
+  const ip = '10.5.27.60';
   const port = 2451;
 
-  await app.listen(port, () => {
+  await app.listen(port, ip, () => {
     // console.log('\n');
     // console.log('\x1b[34m|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\x1b[0m');
     // console.log(`\x1b[34m||||||||\x1b[0m \x1b[1m\x1b[32mServidor corriendo en ${port}\x1b[0m \x1b[34m||||||||\x1b[0m`);
